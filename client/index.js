@@ -34,8 +34,8 @@ function waitForContinue(wh){
 }
 
 async function useCommand(command, wh){
-    console.clear()
     if(command == "SELECT"){
+        console.clear()
         const query = await inquirer.prompt({
             name: 'query',
             type: 'input',
@@ -43,9 +43,10 @@ async function useCommand(command, wh){
         });
         console.clear()
         console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
-        socket.emit("get-entry")
+        socket.emit("get-entry", query.query)
     }
     if(command == "SEARCH"){
+        console.clear()
         const query = await inquirer.prompt({
             name: 'query',
             type: 'input',
@@ -56,6 +57,7 @@ async function useCommand(command, wh){
         socket.emit("entry-exists", query.query)
     }
     if(command == "HELP"){
+        console.clear()
         console.log("Listing all commands:")
         console.log("- SEARCH - Search for an entry with the entry's name.")
         console.log("- SELECT - Open an entry so that you can read, edit or delete it.")
@@ -103,8 +105,11 @@ async function start(){
 
 // Connect
 socket = io.connect("http://"+server+":"+port);
-start();
 
+socket.on("connection-working", () => {
+    start();
+})
+ 
 socket.on("entry-exists", (exists) => {
     if(exists) console.log("That entry does exist in the warehouse!")
     else console.log("That entry does not exist in the warehouse!")
@@ -127,7 +132,7 @@ socket.on("warehouse-stats", (x, y) => {
 });
 
 socket.on("error", (x) => {
-    console.log("ERROR SERVER SIDE: "+x)
+    console.log("ERROR : "+x)
 })
 
 socket.on("save-status", (s,x) => {
