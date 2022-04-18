@@ -8,7 +8,7 @@ readline = require('readline');
 // Options
 const server = "localhost";
 const port = 1234;
-const encryptionkey = "test2";
+const encryptionkey = "test";
 
 // Encryption
 const crypto = new SimpleCrypto(encryptionkey);

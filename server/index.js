@@ -105,6 +105,7 @@ startupWarehouseManager()
 server.on("connection", (socket) => {
     if(!locked){
         console.log("Connection")
+        socket.emit("connection-working")
         socket.on("disconnect", () => {
             if(socket == goodSocket){
                 goodSocket = null
@@ -133,8 +134,8 @@ server.on("connection", (socket) => {
         })
 
         socket.on("try-login", (mp) =>{
-            const dmp = crypto.decrypt(mp)
             try{
+                const dmp = crypto.decrypt(mp)
                 warehouse = loadWarehouse(dmp)
                 goodSocket = socket;
                 locked = true
