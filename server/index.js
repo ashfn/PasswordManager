@@ -114,9 +114,9 @@ server.on("connection", (socket) => {
         socket.on("entry-exists", (entry) => {
             var ex = false
             for(var i in warehouse.entries){
-                console.log(warehouse.entries[i].name)
+                if(i.name == entry) ex = true;
             }
-            return ex
+            socket.emit("entry-exists", ex)
         })
         socket.on("probe", () => {
             if(allowProbe){
@@ -158,6 +158,6 @@ server.on("connection", (socket) => {
         });
     }else{
         socket.emit("Error", "User already connected. Try again later.")
-        socket.close()
+        socket.disconnect()
     }
 })

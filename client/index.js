@@ -8,10 +8,13 @@ readline = require('readline');
 // Options
 const server = "localhost";
 const port = 1234;
-const encryptionkey = "test";
+const encryptionkey = "test2";
 
 // Encryption
 const crypto = new SimpleCrypto(encryptionkey);
+
+// Temp Storage
+var wh;
 
 function waitForContinue(wh){
     inquirer
@@ -31,19 +34,28 @@ function waitForContinue(wh){
 }
 
 async function useCommand(command, wh){
-    if(command == "search"){
-        console.clear()
+    console.clear()
+    if(command == "SELECT"){
         const query = await inquirer.prompt({
             name: 'query',
             type: 'input',
             message: 'Enter the name of the entry',
         });
         console.clear()
-        console.log("Searching for entry "+ query.query+" in warehouse " + wh)
+        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
+        socket.emit("get-entry")
+    }
+    if(command == "SEARCH"){
+        const query = await inquirer.prompt({
+            name: 'query',
+            type: 'input',
+            message: 'Enter the name of the entry',
+        });
+        console.clear()
+        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
         socket.emit("entry-exists", query.query)
     }
-    if(command == "help"){
-        console.clear()
+    if(command == "HELP"){
         console.log("Listing all commands:")
         console.log("- SEARCH - Search for an entry with the entry's name.")
         console.log("- SELECT - Open an entry so that you can read, edit or delete it.")
@@ -62,7 +74,7 @@ const getCommand = (whName) => {
     }
     prompt(p)
         .then(answer => {
-            useCommand(answer.command, whName)
+            useCommand(answer.command.toUpperCase(), whName)
         })
         .catch(console.error)
 }
@@ -93,6 +105,12 @@ async function start(){
 socket = io.connect("http://"+server+":"+port);
 start();
 
+socket.on("entry-exists", (exists) => {
+    if(exists) console.log("That entry does exist in the warehouse!")
+    else console.log("That entry does not exist in the warehouse!")
+    waitForContinue(wh)
+})
+
 socket.on("login-status", (statusCode) => {
     if(statusCode == 1){
         console.log("Login Success!")
@@ -105,6 +123,7 @@ socket.on("login-status", (statusCode) => {
 socket.on("warehouse-stats", (x, y) => {
     console.log("==============\nWarehouse Name: "+y+"\nWarehouse Entries: "+x+"\n==============\n")
     loop(y)
+    wh=y
 });
 
 socket.on("error", (x) => {
