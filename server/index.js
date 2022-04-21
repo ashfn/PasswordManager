@@ -10,7 +10,7 @@ const os = require("os")
 // Options 
 const port = 1234;
 const encryptionkey = "test";
-const datadir = "C:\\Users\\User\\Documents\\PasswordManager\\data\\";
+const datadir = "C:\\Users\\User\\Documents\\PasswordManager2\\data\\";
 const allowProbe = true;
 
 // Server stuff
@@ -82,8 +82,11 @@ function warehouseExists(){
     try {
         if (fs.existsSync(datadir+"warehouse")) {
             return true
+        }else{
+            return false
         }
     }catch(err) {
+        console.log(err)
         return false
     }
 }
@@ -125,6 +128,11 @@ server.on("connection", (socket) => {
                 goodSocket = null
                 locked = false;
             }
+        })
+        socket.on("entry-make", (name,url,value) =>{
+            e = new Entry(name,url,value)
+            warehouse.entries.push(e.getData())
+            socket.emit("entry-created", e.id)
         })
         socket.on("get-entry", (entry) => {
             if(entryExists(warehouse,entry)){
