@@ -15,6 +15,7 @@ const crypto = new SimpleCrypto(encryptionkey);
 
 // Temp Storage
 var wh;
+var selectedEntry;
 
 function waitForContinue(wh){
     inquirer
@@ -42,8 +43,8 @@ async function useCommand(command, wh){
             message: 'Enter the name of the entry',
         });
         console.clear()
-        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
-        socket.emit("get-entry", query.query)
+        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...");
+        socket.emit("get-entry", query.query);
     }
     if(command == "SEARCH"){
         console.clear()
@@ -110,6 +111,8 @@ socket.on("connection-working", () => {
     start();
 })
  
+
+
 socket.on("entry-exists", (exists) => {
     if(exists) console.log("That entry does exist in the warehouse!")
     else console.log("That entry does not exist in the warehouse!")

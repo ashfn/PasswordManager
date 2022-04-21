@@ -99,6 +99,20 @@ function startupWarehouseManager(){
     }
 }
 
+function entryExists(warehouse, entry){
+    var ex = false
+    for(var i in warehouse.entries){
+        if(i.name == entry) ex = true;
+    }
+    return ex
+}
+
+function getEntry(warehouse, entry){
+    for(var i in warehouse.entries){
+        if(i.name == entry) return i;
+    }
+}
+
 startupWarehouseManager()
 
 // Connection listener
@@ -112,12 +126,15 @@ server.on("connection", (socket) => {
                 locked = false;
             }
         })
-        socket.on("entry-exists", (entry) => {
-            var ex = false
-            for(var i in warehouse.entries){
-                if(i.name == entry) ex = true;
+        socket.on("get-entry", (entry) => {
+            if(entryExists(warehouse,entry)){
+                socket.emit("get-entry", getEntry(warehouse,entry))
+            }else{
+                socket.emit("error", "Entry with that name does not exist.")
             }
-            socket.emit("entry-exists", ex)
+        })
+        socket.on("entry-exists", (entry) => {
+            socket.emit("entry-exists", entryExists(warehouse,entry))
         })
         socket.on("probe", () => {
             if(allowProbe){
