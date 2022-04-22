@@ -10,7 +10,7 @@ const os = require("os")
 // Options 
 const port = 1234;
 const encryptionkey = "test";
-const datadir = "C:\\Users\\User\\Documents\\PasswordManager\\data\\";
+const datadir = "C:\\Users\\User\\Documents\\PasswordManager2\\data\\";
 const allowProbe = true;
 
 // Server stuff
@@ -82,8 +82,11 @@ function warehouseExists(){
     try {
         if (fs.existsSync(datadir+"warehouse")) {
             return true
+        }else{
+            return false
         }
     }catch(err) {
+        console.log(err)
         return false
     }
 }
@@ -96,6 +99,20 @@ function startupWarehouseManager(){
         x = makeDefaultWarehouse()
         saveWarehouse(x)
         console.log("Default warehouse created, please login and change the credentials!")
+    }
+}
+
+function entryExists(warehouse, entry){
+    var ex = false
+    for(var i in warehouse.entries){
+        if(i.name == entry) ex = true;
+    }
+    return ex
+}
+
+function getEntry(warehouse, entry){
+    for(var i in warehouse.entries){
+        if(i.name == entry) return i;
     }
 }
 
@@ -112,12 +129,20 @@ server.on("connection", (socket) => {
                 locked = false;
             }
         })
-        socket.on("entry-exists", (entry) => {
-            var ex = false
-            for(var i in warehouse.entries){
-                if(i.name == entry) ex = true;
+        socket.on("entry-make", (name,url,value) =>{
+            e = new Entry(name,url,value)
+            warehouse.entries.push(e.getData())
+            socket.emit("entry-created", e.id)
+        })
+        socket.on("get-entry", (entry) => {
+            if(entryExists(warehouse,entry)){
+                socket.emit("get-entry", getEntry(warehouse,entry))
+            }else{
+                socket.emit("error", "Entry with that name does not exist.")
             }
-            socket.emit("entry-exists", ex)
+        })
+        socket.on("entry-exists", (entry) => {
+            socket.emit("entry-exists", entryExists(warehouse,entry))
         })
         socket.on("probe", () => {
             if(allowProbe){

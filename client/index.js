@@ -15,6 +15,7 @@ const crypto = new SimpleCrypto(encryptionkey);
 
 // Temp Storage
 var wh;
+var selectedEntry;
 
 function waitForContinue(wh){
     inquirer
@@ -34,6 +35,44 @@ function waitForContinue(wh){
 }
 
 async function useCommand(command, wh){
+    if(command == "SAVE"){
+        socket.emit("save", false)
+    }
+    if(command == "MAKE"){
+        console.clear()
+        const name = await inquirer.prompt({
+            name: 'name',
+            type: 'input',
+            message: 'Enter the name of the entry',
+        });
+        const url = await inquirer.prompt({
+            name: 'value',
+            type: 'input',
+            message: 'Enter the URL of the entry',
+        });
+        const value = await inquirer.prompt({
+            name: 'value',
+            type: 'password',
+            message: 'Enter the value of the entry',
+        });
+        inquirer
+        .prompt([
+        {
+            type: 'list',
+            name: 'option',
+            message: 'Confirm?',
+            choices: ['Enter'],
+        },
+        ])
+        .then(answers => {
+            if(answers.option == 'Enter'){
+                socket.emit("entry-make", name.name,url.url,value.value)
+                loop(wh)
+            }else{
+                loop(wh)
+            }
+        });
+    }
     if(command == "SELECT"){
         console.clear()
         const query = await inquirer.prompt({
@@ -42,8 +81,8 @@ async function useCommand(command, wh){
             message: 'Enter the name of the entry',
         });
         console.clear()
-        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
-        socket.emit("get-entry", query.query)
+        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...");
+        socket.emit("get-entry", query.query);
     }
     if(command == "SEARCH"){
         console.clear()
@@ -65,7 +104,16 @@ async function useCommand(command, wh){
         console.log("- RENAME - Rename the warehouse")
         console.log("- PASSWD - Change the password for the warehouse.")
         waitForContinue(wh)
-    }
+    }/**else{
+        console.clear()
+        console.log(`Unknown Command: ${command}`)
+        waitForContinue(wh)
+    }*/
+}
+
+function receiveEntry(entry){
+    console.clear()
+    console.log("Manage Entry: "+entry.name)
 }
 
 const getCommand = (whName) => {
@@ -110,6 +158,10 @@ socket.on("connection-working", () => {
     start();
 })
  
+socket.on("get-entry", (entry) => {
+    receiveEntry(entry)
+})
+
 socket.on("entry-exists", (exists) => {
     if(exists) console.log("That entry does exist in the warehouse!")
     else console.log("That entry does not exist in the warehouse!")
@@ -133,6 +185,7 @@ socket.on("warehouse-stats", (x, y) => {
 
 socket.on("error", (x) => {
     console.log("ERROR : "+x)
+    waitForContinue(wh)
 })
 
 socket.on("save-status", (s,x) => {
@@ -141,7 +194,9 @@ socket.on("save-status", (s,x) => {
         if(x){
             exit(0)
         }
+        waitForContinue(wh)
     }if(s == 2){
         console.log("Server-side save unsuccessfully completed.")
+        waitForContinue(wh)
     }
 })
