@@ -130,9 +130,11 @@ server.on("connection", (socket) => {
             }
         })
         socket.on("entry-make", (name,url,value) =>{
+          console.log(url)
             e = new Entry(name,url,value)
             warehouse.entries.push(e.getData())
             socket.emit("entry-created", e.id)
+            console.log(warehouse.entries)
         })
         socket.on("get-entry", (entry) => {
             if(entryExists(warehouse,entry)){

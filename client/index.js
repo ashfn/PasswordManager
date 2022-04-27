@@ -46,7 +46,7 @@ async function useCommand(command, wh){
             message: 'Enter the name of the entry',
         });
         const url = await inquirer.prompt({
-            name: 'value',
+            name: 'url',
             type: 'input',
             message: 'Enter the URL of the entry',
         });
