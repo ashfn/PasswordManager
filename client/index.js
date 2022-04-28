@@ -112,8 +112,7 @@ async function useCommand(command, wh){
 }
 
 function receiveEntry(entry){
-    console.clear()
-    console.log("Manage Entry: "+entry.name)
+  console.log("Manage Entry: "+entry.name)
 }
 
 const getCommand = (whName) => {
@@ -159,7 +158,7 @@ socket.on("connection-working", () => {
 })
  
 socket.on("get-entry", (entry) => {
-    receiveEntry(entry)
+  console.log(entry)
 })
 
 socket.on("entry-exists", (exists) => {

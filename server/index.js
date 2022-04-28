@@ -103,17 +103,23 @@ function startupWarehouseManager(){
 }
 
 function entryExists(warehouse, entry){
-    var ex = false
-    for(var i in warehouse.entries){
-        if(i.name == entry) ex = true;
-    }
-    return ex
+  var ex = false
+  for (var i=0; i < warehouse.entries.length; i++) {
+    var t = JSON.parse(warehouse.entries[i])
+    if(t.name == entry){
+      ex = true;
+    } 
+  }
+  return ex
 }
 
 function getEntry(warehouse, entry){
-    for(var i in warehouse.entries){
-        if(i.name == entry) return i;
-    }
+  for (var i=0; i < warehouse.entries.length; i++) {
+    var t = JSON.parse(warehouse.entries[i])
+    if(t.name == entry){
+      return t
+    } 
+  }
 }
 
 startupWarehouseManager()
@@ -130,14 +136,18 @@ server.on("connection", (socket) => {
             }
         })
         socket.on("entry-make", (name,url,value) =>{
-          console.log(url)
-            e = new Entry(name,url,value)
-            warehouse.entries.push(e.getData())
-            socket.emit("entry-created", e.id)
-            console.log(warehouse.entries)
+          console.log(entryExists(warehouse,name))
+          if(entryExists(warehouse,name)){
+            socket.emit("error", "An entry with that name already exists.")
+            return
+          }
+          e = new Entry(name,url,value)
+          warehouse.entries.push(e.getData())
+          socket.emit("entry-created", e.id)
         })
         socket.on("get-entry", (entry) => {
             if(entryExists(warehouse,entry)){
+              console.log(getEntry(warehouse,entry))
                 socket.emit("get-entry", getEntry(warehouse,entry))
             }else{
                 socket.emit("error", "Entry with that name does not exist.")
