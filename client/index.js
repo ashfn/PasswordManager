@@ -35,7 +35,12 @@ function waitForContinue(wh){
 }
 
 async function useCommand(command, wh){
+    if(command == "LIST"){
+        console.clear()
+        socket.emit("list-entry-names")
+    }
     if(command == "SAVE"){
+        console.clear()
         socket.emit("save", false)
     }
     if(command == "MAKE"){
@@ -98,6 +103,7 @@ async function useCommand(command, wh){
     if(command == "HELP"){
         console.clear()
         console.log("Listing all commands:")
+        console.log("- LIST   - List all entries inside of the warehouse.")
         console.log("- SEARCH - Search for an entry with the entry's name.")
         console.log("- SELECT - Open an entry so that you can read, edit or delete it.")
         console.log("- MAKE   - Create an entry and add it to the warehouse")
@@ -153,10 +159,20 @@ async function start(){
 // Connect
 socket = io.connect("http://"+server+":"+port);
 
+
+
 socket.on("connection-working", () => {
     start();
 })
  
+socket.on("list-entry-names", (entries) =>{
+    console.log(entries)
+    for (var i=0; i < entries.length; i++) {
+        console.log(`Entry: ${entries[i]}`)
+      }
+    waitForContinue(wh)
+})
+
 socket.on("get-entry", (entry) => {
   console.log(entry)
 })

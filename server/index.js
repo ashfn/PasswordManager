@@ -54,6 +54,7 @@ class Warehouse{
 // Functions
 function saveWarehouse(warehouse){
     tempCrypto = new SimpleCrypto(warehouse.masterPassword);
+    console.log(warehouse)
     data = tempCrypto.encrypt(warehouse);
     fs.writeFile(datadir+"warehouse", data, err => {
         if (err) {
@@ -105,7 +106,7 @@ function startupWarehouseManager(){
 function entryExists(warehouse, entry){
   var ex = false
   for (var i=0; i < warehouse.entries.length; i++) {
-    var t = JSON.parse(warehouse.entries[i])
+    var t = warehouse.entries[i]
     if(t.name == entry){
       ex = true;
     } 
@@ -135,6 +136,13 @@ server.on("connection", (socket) => {
                 locked = false;
             }
         })
+        socket.on("list-entry-names", () => {
+            var entriesR = []
+            for (var i=0; i < warehouse.entries.length; i++) {
+                entriesR.push(warehouse.entries[i].name)
+            }
+            socket.emit("list-entry-names", entriesR)
+        })
         socket.on("entry-make", (name,url,value) =>{
           console.log(entryExists(warehouse,name))
           if(entryExists(warehouse,name)){
@@ -142,7 +150,7 @@ server.on("connection", (socket) => {
             return
           }
           e = new Entry(name,url,value)
-          warehouse.entries.push(e.getData())
+          warehouse.entries.push(JSON.parse(e.getData()))
           socket.emit("entry-created", e.id)
         })
         socket.on("get-entry", (entry) => {
