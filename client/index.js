@@ -166,7 +166,6 @@ socket.on("connection-working", () => {
 })
  
 socket.on("list-entry-names", (entries) =>{
-    console.log(entries)
     for (var i=0; i < entries.length; i++) {
         console.log(`Entry: ${entries[i]}`)
       }

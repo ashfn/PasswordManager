@@ -53,24 +53,22 @@ class Warehouse{
 
 // Functions
 function saveWarehouse(warehouse){
-    tempCrypto = new SimpleCrypto(warehouse.masterPassword);
-    console.log(warehouse)
-    data = tempCrypto.encrypt(warehouse);
-    fs.writeFile(datadir+"warehouse", data, err => {
-        if (err) {
-            console.error(err);
-            return
-        }
-        console.log("Saved Warehouse: "+warehouse.name);
+  tempCrypto = new SimpleCrypto(warehouse.masterPassword);
+  console.log(warehouse)
+  data = tempCrypto.encrypt(warehouse);
+  console.log(data)
+  fs.writeFile(datadir+"warehouse", data, err => {
+    if (err) {
+      console.error(err);
+      return
+    }
+      console.log("Saved Warehouse: "+warehouse.name);
     })
 }
 
 function loadWarehouse(masterPassword){
     tempCrypto = new SimpleCrypto(masterPassword);
     const data = tempCrypto.decrypt(fs.readFileSync(datadir+'warehouse', 'utf8'));
-    for(var i in data.entries){
-        data.entries[i] = JSON.parse(data.entries[i])
-    }
     return data;
 }
 
@@ -182,12 +180,14 @@ server.on("connection", (socket) => {
             try{
                 const dmp = crypto.decrypt(mp)
                 warehouse = loadWarehouse(dmp)
+                console.log(warehouse)
                 goodSocket = socket;
                 locked = true
                 console.log("Successful warehouse load from "+ socket.id)
                 socket.emit("login-status", 1)
                 socket.emit("warehouse-stats", warehouse.entries.length, warehouse.name)
             }catch(err) {
+                console.log(err)
                 socket.emit("login-status", 2)
                 console.log("Unsuccessful warehouse load from "+ socket.id)
             }
