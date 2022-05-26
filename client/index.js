@@ -214,3 +214,19 @@ socket.on("save-status", (s,x) => {
         waitForContinue(wh)
     }
 })
+
+socket.on("entry-created", (id) => {
+  console.clear()
+  console.log("Entry Created: "+id)
+  waitForContinue(wh)
+})
+
+socket.on("disconnect", () =>{
+  console.log("\nServer offline. Log-in prompt will show up when server is back online.\n")
+})
+/** 
+socket.on("reconnect", () =>{
+  console.log("\nServer back online. Log back in.\n")
+  start();
+})
+*/
