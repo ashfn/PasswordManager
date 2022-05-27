@@ -17,6 +17,8 @@ const crypto = new SimpleCrypto(encryptionkey);
 var wh;
 var selectedEntry;
 
+//
+var waiting = false;
 function waitForContinue(wh){
     inquirer
     .prompt([
@@ -71,8 +73,16 @@ async function useCommand(command, wh){
         ])
         .then(answers => {
             if(answers.option == 'Enter'){
-                socket.emit("entry-make", name.name,url.url,value.value)
-                loop(wh)
+              console.clear()
+              console.log("Waiting for response from server...")
+              socket.emit("entry-make", name.name,url.url,value.value)
+              waiting = true;
+              setTimeout(function() {
+                if(waiting){
+                  console.log("Server did not respond for 3000ms. Entry creation failed.")
+                  waitForContinue(wh)
+                }
+              }, 3000)
             }else{
                 loop(wh)
             }
@@ -216,6 +226,7 @@ socket.on("save-status", (s,x) => {
 })
 
 socket.on("entry-created", (id) => {
+  waiting=false;
   console.clear()
   console.log("Entry Created: "+id)
   waitForContinue(wh)

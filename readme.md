@@ -5,4 +5,4 @@
 ## How It works 
 
 ### Connection Timeline to show the order of how things happen
-![Tux, the Linux mascot](/md_media/connection_timeline.png)
+![Connection Timeline](/md_media/connection_timeline.png)

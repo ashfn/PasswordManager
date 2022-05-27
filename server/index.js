@@ -194,6 +194,7 @@ server.on("connection", (socket) => {
         });
 
         socket.on("save", (exitClientOnSave) => {
+          console.log("debug")
             try{
                 saveWarehouse(warehouse);
                 socket.emit("save-status", 1, exitClientOnSave)
