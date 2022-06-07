@@ -17,6 +17,15 @@ const crypto = new SimpleCrypto(encryptionkey);
 var wh;
 var selectedEntry;
 
+
+let commandsList = [
+  "LIST",
+  "SAVE",
+  "MAKE",
+  "SELECT",
+  "SEARCH",
+  "HELP"
+]
 //
 var waiting = false;
 function waitForContinue(wh){
@@ -36,17 +45,22 @@ function waitForContinue(wh){
     });
 }
 
+function commandWorks(){
+  
+}
+
 async function useCommand(command, wh){
-    if(command == "LIST"){
-        console.clear()
+  
+    if(await command == "LIST"){
+       // console.clear()
         socket.emit("list-entry-names")
     }
-    if(command == "SAVE"){
-        console.clear()
+    else if(await command == "SAVE"){
+       // console.clear()
         socket.emit("save", false)
     }
-    if(command == "MAKE"){
-        console.clear()
+    else if(await command == "MAKE"){
+       // console.clear()
         const name = await inquirer.prompt({
             name: 'name',
             type: 'input',
@@ -88,8 +102,8 @@ async function useCommand(command, wh){
             }
         });
     }
-    if(command == "SELECT"){
-        console.clear()
+    else if(await command == "SELECT"){
+       // console.clear()
         const query = await inquirer.prompt({
             name: 'query',
             type: 'input',
@@ -99,8 +113,8 @@ async function useCommand(command, wh){
         console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...");
         socket.emit("get-entry", query.query);
     }
-    if(command == "SEARCH"){
-        console.clear()
+    else if(await command == "SEARCH"){
+       // console.clear()
         const query = await inquirer.prompt({
             name: 'query',
             type: 'input',
@@ -110,8 +124,8 @@ async function useCommand(command, wh){
         console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
         socket.emit("entry-exists", query.query)
     }
-    if(command == "HELP"){
-        console.clear()
+    else if(await command == "HELP"){
+       // console.clear()
         console.log("Listing all commands:")
         console.log("- LIST   - List all entries inside of the warehouse.")
         console.log("- SEARCH - Search for an entry with the entry's name.")
@@ -120,11 +134,7 @@ async function useCommand(command, wh){
         console.log("- RENAME - Rename the warehouse")
         console.log("- PASSWD - Change the password for the warehouse.")
         waitForContinue(wh)
-    }/**else{
-        console.clear()
-        console.log(`Unknown Command: ${command}`)
-        waitForContinue(wh)
-    }*/
+    }
 }
 
 function receiveEntry(entry){
