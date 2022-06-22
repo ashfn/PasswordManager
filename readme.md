@@ -1,6 +1,6 @@
 # Password Manager
 #### This is my second proper javascript project
-#### Do NOT use it in production.
+#### You probably shouldn't use this as your only password manager
 
 ## How It works 
 
