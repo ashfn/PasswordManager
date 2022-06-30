@@ -17,15 +17,6 @@ const crypto = new SimpleCrypto(encryptionkey);
 var wh;
 var selectedEntry;
 
-
-let commandsList = [
-  "LIST",
-  "SAVE",
-  "MAKE",
-  "SELECT",
-  "SEARCH",
-  "HELP"
-]
 //
 var waiting = false;
 function waitForContinue(wh){
@@ -45,21 +36,25 @@ function waitForContinue(wh){
     });
 }
 
-function commandWorks(){
-  
-}
+const COMMANDS = [
+  "LIST",
+  "SAVE",
+  "MAKE",
+  "SELECT",
+  "SEARCH",
+  "HELP"
+]
 
 async function useCommand(command, wh){
-  
-    if(await command == "LIST"){
+    if(command == "LIST"){
        // console.clear()
         socket.emit("list-entry-names")
     }
-    else if(await command == "SAVE"){
+    else if( command == "SAVE"){
        // console.clear()
         socket.emit("save", false)
     }
-    else if(await command == "MAKE"){
+    else if( command == "MAKE"){
        // console.clear()
         const name = await inquirer.prompt({
             name: 'name',
@@ -102,7 +97,7 @@ async function useCommand(command, wh){
             }
         });
     }
-    else if(await command == "SELECT"){
+    else if( command == "SELECT"){
        // console.clear()
         const query = await inquirer.prompt({
             name: 'query',
@@ -113,7 +108,7 @@ async function useCommand(command, wh){
         console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...");
         socket.emit("get-entry", query.query);
     }
-    else if(await command == "SEARCH"){
+    else if( command == "SEARCH"){
        // console.clear()
         const query = await inquirer.prompt({
             name: 'query',
@@ -124,7 +119,7 @@ async function useCommand(command, wh){
         console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
         socket.emit("entry-exists", query.query)
     }
-    else if(await command == "HELP"){
+    else if( command == "HELP"){
        // console.clear()
         console.log("Listing all commands:")
         console.log("- LIST   - List all entries inside of the warehouse.")
@@ -134,6 +129,9 @@ async function useCommand(command, wh){
         console.log("- RENAME - Rename the warehouse")
         console.log("- PASSWD - Change the password for the warehouse.")
         waitForContinue(wh)
+    }else if(!(COMMANDS.includes(command))){
+      console.log("Unknown command '"+command+"', use HELP to list all usable commands.")
+      waitForContinue(wh)
     }
 }
 
@@ -141,7 +139,7 @@ function receiveEntry(entry){
   console.log("Manage Entry: "+entry.name)
 }
 
-const getCommand = (whName) => {
+async function getCommand (whName){
     const p = {
         type: "input",
         name: "command",
@@ -149,7 +147,8 @@ const getCommand = (whName) => {
     }
     prompt(p)
         .then(answer => {
-            useCommand(answer.command.toUpperCase(), whName)
+          return answer  
+          //await useCommand(answer.command.toUpperCase(), whName)
         })
         .catch(console.error)
 }
@@ -161,7 +160,9 @@ const clearLastLine = () => {
 
 function loop(wh){
     console.clear()
-    useCommand(getCommand(wh))
+    getCommand(wh).then((command) => {
+      useCommand(command)
+    })
 }
 
 async function start(){
