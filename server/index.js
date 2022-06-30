@@ -1,14 +1,12 @@
 // Imports
-const express = require("express");
-const {Server} = require("socket.io");
+const express = require('express')
 const SimpleCrypto = require("simple-crypto-js").default
 const fs = require("fs")
 const {v4: uuidv4} = require("uuid");
 const { SocketAddress } = require("net");
-const os = require("os")
 
 // Options 
-const port = 1234;
+const port = 8080;
 const encryptionkey = "test";
 const datadir = "C:\\Users\\User\\Documents\\PasswordManager2\\data\\";
 const allowProbe = true;
@@ -16,15 +14,10 @@ const allowProbe = true;
 // Server stuff
 const app = express();
 const l = app.listen(port);
-const server = new Server(l, { cors: { origin: "*" } });
+const startTime = new Date()
 
 // Encryption
 const crypto = new SimpleCrypto(encryptionkey)
-
-// Loaded Warehouse
-var warehouse = null;
-var locked = false
-var goodSocket = null;
 
 // Classes
 class Entry{
@@ -51,7 +44,6 @@ class Warehouse{
     }
 }
 
-// Functions
 function saveWarehouse(warehouse){
   tempCrypto = new SimpleCrypto(warehouse.masterPassword);
   console.log(warehouse)
@@ -93,6 +85,7 @@ function warehouseExists(){
 function startupWarehouseManager(){
     if(warehouseExists()){
         console.log("Warehouse exists, ready to load on request.")
+        console.log("Start time is "+startTime)
     }else{
         console.log("No warehouse found! Making the default one.")
         x = makeDefaultWarehouse()
@@ -123,6 +116,40 @@ function getEntry(warehouse, entry){
 
 startupWarehouseManager()
 
+app.get('/uptime', function(req, res){
+  res.status(200).json({"Uptime":new Date()-startTime})
+});
+
+app.get('/entries', function(req, res){
+  console.log(req.query)
+  if(req.query.hasOwnProperty('auth')){
+    res.status(200).json(loadWarehouse(req.query.auth).entries)
+  }else{
+    res.status(401).json({"error":"master password undefined"})
+  }
+})
+app.get('/entry/:id', function(req, res){
+  console.log(req.query)
+  if(req.query.hasOwnProperty('auth')){
+    var warehouse = loadWarehouse(req.query.auth)
+    if(warehouse.entries.some(entry => entry.id === req.params.id)){
+      for(var i in warehouse.entries){
+        if(i.id==req.params.id){
+          res.status(200).json(i)
+          return
+        }
+      }
+      res.status(500).json({"error":"entry exists but could not be located"})
+    }else{
+      req.status(404).json({"error":"entry with id not found"})
+    }
+    res.status(200).json()
+  }else{
+    res.status(401).json({"error":"master password undefined"})
+  }
+})
+
+/**
 // Connection listener
 server.on("connection", (socket) => {
     if(!locked){
@@ -208,3 +235,4 @@ server.on("connection", (socket) => {
         socket.disconnect()
     }
 })
+*/
