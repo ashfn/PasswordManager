@@ -99,25 +99,29 @@ async function useCommand(command, wh){
     }
     else if( command == "SELECT"){
        // console.clear()
-        const query = await inquirer.prompt({
+        const query = inquirer.prompt({
             name: 'query',
             type: 'input',
             message: 'Enter the name of the entry',
+        }).then((query) => {
+          console.clear()
+          console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...");
+          socket.emit("get-entry", query.query);
         });
-        console.clear()
-        console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...");
-        socket.emit("get-entry", query.query);
+
     }
     else if( command == "SEARCH"){
        // console.clear()
-        const query = await inquirer.prompt({
+        inquirer.prompt({
             name: 'query',
             type: 'input',
             message: 'Enter the name of the entry',
-        });
+        }).then((query) => {
         console.clear()
         console.log("Searching for entry \""+ query.query+"\" in warehouse \"" + wh + "\"...")
         socket.emit("entry-exists", query.query)
+        });
+
     }
     else if( command == "HELP"){
        // console.clear()
@@ -139,7 +143,7 @@ function receiveEntry(entry){
   console.log("Manage Entry: "+entry.name)
 }
 
-async function getCommand (whName){
+function getCommand (whName){
     const p = {
         type: "input",
         name: "command",
@@ -147,6 +151,7 @@ async function getCommand (whName){
     }
     prompt(p)
         .then(answer => {
+          console.log("DEBUG: "+answer)
           return answer  
           //await useCommand(answer.command.toUpperCase(), whName)
         })
@@ -159,10 +164,7 @@ const clearLastLine = () => {
 }
 
 function loop(wh){
-    console.clear()
-    getCommand(wh).then((command) => {
-      useCommand(command)
-    })
+  useCommand(getCommand(wh))
 }
 
 async function start(){
