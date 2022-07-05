@@ -128,6 +128,7 @@ app.get('/entries', function(req, res){
     res.status(401).json({"error":"master password undefined"})
   }
 })
+
 app.get('/entry/:id', function(req, res){
   console.log(req.query)
   if(req.query.hasOwnProperty('auth')){
@@ -141,9 +142,23 @@ app.get('/entry/:id', function(req, res){
       }
       res.status(500).json({"error":"entry exists but could not be located"})
     }else{
-      req.status(404).json({"error":"entry with id not found"})
+      res.status(404).json({"error":"entry with id not found"})
     }
     res.status(200).json()
+  }else{
+    res.status(401).json({"error":"master password undefined"})
+  }
+})
+
+app.get('/create', function(req, res){
+  console.log(req.query)
+  if(req.query.hasOwnProperty('auth')){
+    if(req.query.hasOwnProperty('name') && req.query.hasOwnProperty('url') && req.query.hasOwnProperty('value')){
+      res.status(200).json({"Test":"Test"})
+    }else{
+      res.status(500).json({"error":"missing value(s)"})
+    }
+    //res.status(200).json(loadWarehouse(req.query.auth).entries)
   }else{
     res.status(401).json({"error":"master password undefined"})
   }
